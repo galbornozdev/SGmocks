@@ -3,15 +3,15 @@ const bodyParser = require('body-parser')
 const crypto = require('crypto')
 const { error, count } = require('console')
 const { randomStr } = require('./randomIdStrGenerator')
+require('dotenv').config()
 
 /* BANCO */
 
-const gap = 2;
-//let idTrx = 4976078;
-let idTrx = 13967;
+const gap = parseInt(process.env.GAP)
+let idTrx = parseInt(process.env.ID_TRX);
 
 const app = express()
-const port = 5888
+const port = parseInt(process.env.PORT) || 5888
 
 // create application/json parser
 var jsonParser = bodyParser.json()
@@ -23,7 +23,7 @@ var createNewTrx = () => {
     "debito": {
       "id": idTrx,
       "idCredito": null,
-      "idTrx": randomStr(12),
+      "idTrx": randomStr(parseInt(process.env.RANDOM_STR_LENGTH) || 12),
       "cbu": "",
       "moneda": "",
       "importe": null,
@@ -40,17 +40,31 @@ var createNewTrx = () => {
   return response;
 }
 
+// var createNewTrxError = () => {
+//     let response = {
+//     "debito": {
+//       "id": idTrx,
+//       "idCredito": null,
+//       "idTrx": randomStr(parseInt(process.env.RANDOM_STR_ERROR_LENGTH) || 10),
+//       "cbu": "",
+//       "moneda": "",
+//       "importe": null,
+//       "cvu": ""
+//     },
+//     "estado": {
+//       "codigo": "99",
+//       "descripcion": "Prueba de error local simulando banco.",
+//       "errorCoelsa": "Prueba de error local simulando banco."
+//     }
+//   }
+
+//   idTrx += gap
+//   return response;
+// }
+
 var createNewTrxError = () => {
     let response = {
-    "debito": {
-      "id": idTrx,
-      "idCredito": null,
-      "idTrx": randomStr(10),
-      "cbu": "",
-      "moneda": "",
-      "importe": null,
-      "cvu": ""
-    },
+    "debito": null,
     "estado": {
       "codigo": "99",
       "descripcion": "Prueba de error local simulando banco.",
@@ -58,7 +72,6 @@ var createNewTrxError = () => {
     }
   }
 
-  idTrx += gap
   return response;
 }
 
@@ -82,8 +95,7 @@ app.post('banco/token', jsonParser ,(req, res) => {
     "Scope": "your_scope_here",
     "Token_Type": "your_token_type_here",
     "Bearer": "your_bearer_here",
-    //"Expires_In": 3600 //1h
-    "Expires_In": 300 //5m
+    "Expires_In": 3600 //1h
   }
   let status = 200
   res.status(status).json(response)
@@ -124,8 +136,7 @@ app.post('banco/TransferenciaCoinag', jsonParser ,(req, res) => {
 
   let status = 200
 
-  let isError = false;
-  //let isError = countTrx % 2 === 0; // Simula un error cada 2 transacciones
+  let isError = process.env.IS_ERROR === 'true';
   const response = isError ? createNewTrxError() : createNewTrx();
 
   res.status(status).json(response)
