@@ -79,13 +79,13 @@ app.get('/health', (req, res) => {
   res.status(200).send('healthy')
 })
 
-app.post('banco/Transferencia', jsonParser ,(req, res) => {
+app.post('/banco/Transferencia', jsonParser ,(req, res) => {
   console.log("banco/Transferencia")
   console.log(req.body);
   res.status(parseInt(process.env.STATUS_BANCO_TRANSFERENCIA) || 200).json(createNewTrx())
 })
 
-app.post('banco/token', jsonParser ,(req, res) => {
+app.post('/banco/token', jsonParser ,(req, res) => {
   console.log("banco/token", ` [${new Date().toLocaleString('es-AR')}]`)
   console.log(req.body);
 
@@ -103,7 +103,7 @@ app.post('banco/token', jsonParser ,(req, res) => {
   console.log("RESPONSE:\n", response, "\n")
 })
 
-app.post('banco/Transferencia/MovimientoFondos', jsonParser ,(req, res) => {
+app.post('/banco/Transferencia/MovimientoFondos', jsonParser ,(req, res) => {
   console.log("banco/Transferencia/MovimientoFondos")
   console.log(req.body);
   
@@ -115,7 +115,7 @@ app.post('banco/Transferencia/MovimientoFondos', jsonParser ,(req, res) => {
   res.status(parseInt(process.env.STATUS_BANCO_MOVIMIENTO_FONDOS) || 200).json(response)
 })
 
-app.post('banco/TransferenciaInterna', jsonParser ,(req, res) => {
+app.post('/banco/TransferenciaInterna', jsonParser ,(req, res) => {
   console.log("banco/TransferenciaInterna")
   console.log(req.body);
 
@@ -127,7 +127,7 @@ app.post('banco/TransferenciaInterna', jsonParser ,(req, res) => {
   res.status(parseInt(process.env.STATUS_BANCO_TRANSFERENCIA_INTERNA) || 200).json(response)
 })
 
-app.post('banco/TransferenciaCoinag', jsonParser ,(req, res) => {
+app.post('/banco/TransferenciaCoinag', jsonParser ,(req, res) => {
   countTrx++;
   
   console.log("banco/TransferenciaCoinag", ` [${new Date().toLocaleString('es-AR')}]`)
@@ -147,7 +147,7 @@ app.post('banco/TransferenciaCoinag', jsonParser ,(req, res) => {
 
 /* INTEGRADOR */
 
-app.post('integrador/Transacciones', jsonParser ,(req, res) => {
+app.post('/integrador/Transacciones', jsonParser ,(req, res) => {
   console.log("/Transacciones")
   console.log(req.body);
 
@@ -156,7 +156,7 @@ app.post('integrador/Transacciones', jsonParser ,(req, res) => {
 })
 
 let countNovedad = 0;
-app.post('integrador/Cuentas/NovedadCVU', jsonParser ,(req, res) => {
+app.post('/integrador/Cuentas/NovedadCVU', jsonParser ,(req, res) => {
   console.log(`Llamado Nº${++countNovedad} al endpoint 'integrador/Cuentas/NovedadCVU' de la entidad`)
   console.log(req.body);
 
@@ -165,7 +165,7 @@ app.post('integrador/Cuentas/NovedadCVU', jsonParser ,(req, res) => {
 })
 
 
-app.get('integrador/Saldo/:cuit/:nroCuentaEnEntidad', jsonParser ,(req, res) => {
+app.get('/integrador/Saldo/:cuit/:nroCuentaEnEntidad', jsonParser ,(req, res) => {
   console.log(`Llamado Nº${++countNovedad} al endpoint 'integrador/Saldo/${req.params.cuit}/${req.params.nroCuentaEnEntidad}' de la entidad`)
 
   let response = {"fechaSaldo":"2024-11-25T03:00:00Z","importe":18564.2700,"idMoneda":1}
