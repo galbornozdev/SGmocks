@@ -255,12 +255,50 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "ADMIN",
+      "item": [
+        {
+          "name": "Config",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"GAP\": 3,\n  \"ID_TRX\": 15000,\n  \"IS_ERROR\": true,\n  \"RANDOM_STR_LENGTH\": 15,\n  \"STATUS_BANCO_TRANSFERENCIA\": 400,\n  \"STATUS_BANCO_TOKEN\": 500\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/config",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "config"
+              ]
+            },
+            "description": "Update configuration variables at runtime. Supported fields: GAP, ID_TRX, IS_ERROR, RANDOM_STR_LENGTH, RANDOM_STR_ERROR_LENGTH, and all STATUS_* variables for each endpoint."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:5888",
+      "value": "http://localhost:{{port}}",
+      "type": "string"
+    },
+    {
+      "key": "port",
+      "value": "5888",
       "type": "string"
     },
     {
