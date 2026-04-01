@@ -10,19 +10,22 @@ require('dotenv').config()
 let config = {
   gap: parseInt(process.env.GAP) || 1,
   idTrx: parseInt(process.env.ID_TRX) || 999999,
-  isError: process.env.IS_ERROR === 'true',
+  transferenciaCoinagIsError: process.env.TRANSFERENCIA_COINAG_IS_ERROR === 'true',
   randomStrLength: parseInt(process.env.RANDOM_STR_LENGTH) || 12,
   randomStrErrorLength: parseInt(process.env.RANDOM_STR_ERROR_LENGTH) || 10,
   statusCodes: {
-    bancoTransferencia: parseInt(process.env.STATUS_BANCO_TRANSFERENCIA) || 200,
-    bancoToken: parseInt(process.env.STATUS_BANCO_TOKEN) || 200,
-    bancoMovimientoFondos: parseInt(process.env.STATUS_BANCO_MOVIMIENTO_FONDOS) || 200,
-    bancoTransferenciaInterna: parseInt(process.env.STATUS_BANCO_TRANSFERENCIA_INTERNA) || 200,
-    bancoTransferenciaCoinag: parseInt(process.env.STATUS_BANCO_TRANSFERENCIA_COINAG) || 200,
-    integradorTransacciones: parseInt(process.env.STATUS_INTEGRADOR_TRANSACCIONES) || 200,
-    integradorNovedadCVU: parseInt(process.env.STATUS_INTEGRADOR_NOVEDAD_CVU) || 200,
-    integradorSaldo: parseInt(process.env.STATUS_INTEGRADOR_SALDO) || 200
-  }
+    bancoTransferencia: parseInt(process.env.STATUS_BANCO_TRANSFERENCIA_STATUS_CODE) || 200,
+    bancoToken: parseInt(process.env.STATUS_BANCO_TOKEN_STATUS_CODE) || 200,
+    bancoMovimientoFondos: parseInt(process.env.STATUS_BANCO_MOVIMIENTO_FONDOS_STATUS_CODE) || 200,
+    bancoTransferenciaInterna: parseInt(process.env.STATUS_BANCO_TRANSFERENCIA_INTERNA_STATUS_CODE) || 200,
+    bancoTransferenciaCoinag: parseInt(process.env.STATUS_BANCO_TRANSFERENCIA_COINAG_STATUS_CODE) || 200,
+    bancoConsulta: parseInt(process.env.STATUS_BANCO_CONSULTA_STATUS_CODE) || 200,
+    integradorTransacciones: parseInt(process.env.STATUS_INTEGRADOR_TRANSACCIONES_STATUS_CODE) || 200,
+    integradorNovedadCVU: parseInt(process.env.STATUS_INTEGRADOR_NOVEDAD_CVU_STATUS_CODE) || 200,
+    integradorSaldo: parseInt(process.env.STATUS_INTEGRADOR_SALDO_STATUS_CODE) || 200
+  },
+  bancoConsultaResponse: process.env.BANCO_CONSULTA_RESPONSE ? JSON.parse(process.env.BANCO_CONSULTA_RESPONSE) : {"cuenta":{"tipoCuenta":"20","idBanco":"431","activa":true,"cbu":"4310001322100000000016","cbuAnterior":null,"alias":null,"aliasAnterior":null,"bloqueado":false,"fechaAlta":"0001-01-01T00:00:00","fechaModificacion":"0001-01-01T00:00:00"},"titulares":[{"tipoPersona":"J","cuit":"30526414086","nombre":"BOLSA DE COMERCIO DE ROSARIO"}]},
+  integradorSaldoResponse: process.env.INTEGRADOR_SALDO_RESPONSE ? JSON.parse(process.env.INTEGRADOR_SALDO_RESPONSE) : {"fechaSaldo":"2024-11-25T03:00:00Z","importe":18564.2700,"idMoneda":1}
 }
 
 /* BANCO */
@@ -153,13 +156,24 @@ app.post('/banco/TransferenciaCoinag', jsonParser ,(req, res) => {
 
   let status = config.statusCodes.bancoTransferenciaCoinag
 
-  let isError = config.isError;
+  let isError = config.transferenciaCoinagIsError;
   const response = isError ? createNewTrxError() : createNewTrx();
 
   res.status(status).json(response)
   
   console.log("STATUS: ", status)
   console.log("RESPONSE:\n", response, "\n")
+})
+
+app.get('/banco/Consulta/:cbu', jsonParser ,(req, res) => {
+  console.log(`integrador/Saldo/${req.params.cbu}`)
+  console.log("REQUEST:\n", req.body);
+  console.log("AUTHORIZATION:\n", req.headers.authorization);
+
+  let response = config.bancoConsultaResponse
+  res.status(config.statusCodes.bancoConsulta).send(response)
+
+  
 })
 
 /* INTEGRADOR */
@@ -185,7 +199,7 @@ app.post('/integrador/Cuentas/NovedadCVU', jsonParser ,(req, res) => {
 app.get('/integrador/Saldo/:cuit/:nroCuentaEnEntidad', jsonParser ,(req, res) => {
   console.log(`Llamado Nº${++countNovedad} al endpoint 'integrador/Saldo/${req.params.cuit}/${req.params.nroCuentaEnEntidad}' de la entidad`)
 
-  let response = {"fechaSaldo":"2024-11-25T03:00:00Z","importe":18564.2700,"idMoneda":1}
+  let response = config.integradorSaldoResponse
   res.status(config.statusCodes.integradorSaldo).send(response)
 
 })
@@ -206,9 +220,9 @@ app.post('/admin/config', jsonParser, (req, res) => {
     config.idTrx = parseInt(updates.ID_TRX);
     process.env.ID_TRX = updates.ID_TRX.toString();
   }
-  if (updates.IS_ERROR !== undefined) {
-    config.isError = updates.IS_ERROR === true || updates.IS_ERROR === 'true';
-    process.env.IS_ERROR = config.isError.toString();
+  if (updates.TRANSFERENCIA_COINAG_IS_ERROR !== undefined) {
+    config.transferenciaCoinagIsError = updates.TRANSFERENCIA_COINAG_IS_ERROR === true || updates.TRANSFERENCIA_COINAG_IS_ERROR === 'true';
+    process.env.TRANSFERENCIA_COINAG_IS_ERROR = config.transferenciaCoinagIsError.toString();
   }
   if (updates.RANDOM_STR_LENGTH !== undefined) {
     config.randomStrLength = parseInt(updates.RANDOM_STR_LENGTH);
@@ -220,37 +234,71 @@ app.post('/admin/config', jsonParser, (req, res) => {
   }
 
   // Status codes
-  if (updates.STATUS_BANCO_TRANSFERENCIA !== undefined) {
-    config.statusCodes.bancoTransferencia = parseInt(updates.STATUS_BANCO_TRANSFERENCIA);
-    process.env.STATUS_BANCO_TRANSFERENCIA = updates.STATUS_BANCO_TRANSFERENCIA.toString();
+  if (updates.STATUS_BANCO_TRANSFERENCIA_STATUS_CODE !== undefined) {
+    config.statusCodes.bancoTransferencia = parseInt(updates.STATUS_BANCO_TRANSFERENCIA_STATUS_CODE);
+    process.env.STATUS_BANCO_TRANSFERENCIA_STATUS_CODE = updates.STATUS_BANCO_TRANSFERENCIA_STATUS_CODE.toString();
   }
-  if (updates.STATUS_BANCO_TOKEN !== undefined) {
-    config.statusCodes.bancoToken = parseInt(updates.STATUS_BANCO_TOKEN);
-    process.env.STATUS_BANCO_TOKEN = updates.STATUS_BANCO_TOKEN.toString();
+  if (updates.STATUS_BANCO_TOKEN_STATUS_CODE !== undefined) {
+    config.statusCodes.bancoToken = parseInt(updates.STATUS_BANCO_TOKEN_STATUS_CODE);
+    process.env.STATUS_BANCO_TOKEN_STATUS_CODE = updates.STATUS_BANCO_TOKEN_STATUS_CODE.toString();
   }
-  if (updates.STATUS_BANCO_MOVIMIENTO_FONDOS !== undefined) {
-    config.statusCodes.bancoMovimientoFondos = parseInt(updates.STATUS_BANCO_MOVIMIENTO_FONDOS);
-    process.env.STATUS_BANCO_MOVIMIENTO_FONDOS = updates.STATUS_BANCO_MOVIMIENTO_FONDOS.toString();
+  if (updates.STATUS_BANCO_MOVIMIENTO_FONDOS_STATUS_CODE !== undefined) {
+    config.statusCodes.bancoMovimientoFondos = parseInt(updates.STATUS_BANCO_MOVIMIENTO_FONDOS_STATUS_CODE);
+    process.env.STATUS_BANCO_MOVIMIENTO_FONDOS_STATUS_CODE = updates.STATUS_BANCO_MOVIMIENTO_FONDOS_STATUS_CODE.toString();
   }
-  if (updates.STATUS_BANCO_TRANSFERENCIA_INTERNA !== undefined) {
-    config.statusCodes.bancoTransferenciaInterna = parseInt(updates.STATUS_BANCO_TRANSFERENCIA_INTERNA);
-    process.env.STATUS_BANCO_TRANSFERENCIA_INTERNA = updates.STATUS_BANCO_TRANSFERENCIA_INTERNA.toString();
+  if (updates.STATUS_BANCO_TRANSFERENCIA_INTERNA_STATUS_CODE !== undefined) {
+    config.statusCodes.bancoTransferenciaInterna = parseInt(updates.STATUS_BANCO_TRANSFERENCIA_INTERNA_STATUS_CODE);
+    process.env.STATUS_BANCO_TRANSFERENCIA_INTERNA_STATUS_CODE = updates.STATUS_BANCO_TRANSFERENCIA_INTERNA_STATUS_CODE.toString();
   }
-  if (updates.STATUS_BANCO_TRANSFERENCIA_COINAG !== undefined) {
-    config.statusCodes.bancoTransferenciaCoinag = parseInt(updates.STATUS_BANCO_TRANSFERENCIA_COINAG);
-    process.env.STATUS_BANCO_TRANSFERENCIA_COINAG = updates.STATUS_BANCO_TRANSFERENCIA_COINAG.toString();
+  if (updates.STATUS_BANCO_TRANSFERENCIA_COINAG_STATUS_CODE !== undefined) {
+    config.statusCodes.bancoTransferenciaCoinag = parseInt(updates.STATUS_BANCO_TRANSFERENCIA_COINAG_STATUS_CODE);
+    process.env.STATUS_BANCO_TRANSFERENCIA_COINAG_STATUS_CODE = updates.STATUS_BANCO_TRANSFERENCIA_COINAG_STATUS_CODE.toString();
   }
-  if (updates.STATUS_INTEGRADOR_TRANSACCIONES !== undefined) {
-    config.statusCodes.integradorTransacciones = parseInt(updates.STATUS_INTEGRADOR_TRANSACCIONES);
-    process.env.STATUS_INTEGRADOR_TRANSACCIONES = updates.STATUS_INTEGRADOR_TRANSACCIONES.toString();
+  if (updates.STATUS_BANCO_CONSULTA_STATUS_CODE !== undefined) {
+    config.statusCodes.bancoConsulta = parseInt(updates.STATUS_BANCO_CONSULTA_STATUS_CODE);
+    process.env.STATUS_BANCO_CONSULTA_STATUS_CODE = updates.STATUS_BANCO_CONSULTA_STATUS_CODE.toString();
   }
-  if (updates.STATUS_INTEGRADOR_NOVEDAD_CVU !== undefined) {
-    config.statusCodes.integradorNovedadCVU = parseInt(updates.STATUS_INTEGRADOR_NOVEDAD_CVU);
-    process.env.STATUS_INTEGRADOR_NOVEDAD_CVU = updates.STATUS_INTEGRADOR_NOVEDAD_CVU.toString();
+  if (updates.STATUS_INTEGRADOR_TRANSACCIONES_STATUS_CODE !== undefined) {
+    config.statusCodes.integradorTransacciones = parseInt(updates.STATUS_INTEGRADOR_TRANSACCIONES_STATUS_CODE);
+    process.env.STATUS_INTEGRADOR_TRANSACCIONES_STATUS_CODE = updates.STATUS_INTEGRADOR_TRANSACCIONES_STATUS_CODE.toString();
   }
-  if (updates.STATUS_INTEGRADOR_SALDO !== undefined) {
-    config.statusCodes.integradorSaldo = parseInt(updates.STATUS_INTEGRADOR_SALDO);
-    process.env.STATUS_INTEGRADOR_SALDO = updates.STATUS_INTEGRADOR_SALDO.toString();
+  if (updates.STATUS_INTEGRADOR_NOVEDAD_CVU_STATUS_CODE !== undefined) {
+    config.statusCodes.integradorNovedadCVU = parseInt(updates.STATUS_INTEGRADOR_NOVEDAD_CVU_STATUS_CODE);
+    process.env.STATUS_INTEGRADOR_NOVEDAD_CVU_STATUS_CODE = updates.STATUS_INTEGRADOR_NOVEDAD_CVU_STATUS_CODE.toString();
+  }
+  if (updates.STATUS_INTEGRADOR_SALDO_STATUS_CODE !== undefined) {
+    config.statusCodes.integradorSaldo = parseInt(updates.STATUS_INTEGRADOR_SALDO_STATUS_CODE);
+    process.env.STATUS_INTEGRADOR_SALDO_STATUS_CODE = updates.STATUS_INTEGRADOR_SALDO_STATUS_CODE.toString();
+  }
+
+  // Response payloads
+  if (updates.BANCO_CONSULTA_RESPONSE !== undefined) {
+    try {
+      if (typeof updates.BANCO_CONSULTA_RESPONSE === 'string') {
+        config.bancoConsultaResponse = JSON.parse(updates.BANCO_CONSULTA_RESPONSE);
+        process.env.BANCO_CONSULTA_RESPONSE = updates.BANCO_CONSULTA_RESPONSE;
+      } else {
+        config.bancoConsultaResponse = updates.BANCO_CONSULTA_RESPONSE;
+        process.env.BANCO_CONSULTA_RESPONSE = JSON.stringify(updates.BANCO_CONSULTA_RESPONSE);
+      }
+    } catch (error) {
+      res.status(400).json({ error: "Invalid JSON in BANCO_CONSULTA_RESPONSE", details: error.message });
+      return;
+    }
+  }
+  if (updates.INTEGRADOR_SALDO_RESPONSE !== undefined) {
+    try {
+      if (typeof updates.INTEGRADOR_SALDO_RESPONSE === 'string') {
+        config.integradorSaldoResponse = JSON.parse(updates.INTEGRADOR_SALDO_RESPONSE);
+        process.env.INTEGRADOR_SALDO_RESPONSE = updates.INTEGRADOR_SALDO_RESPONSE;
+      } else {
+        config.integradorSaldoResponse = updates.INTEGRADOR_SALDO_RESPONSE;
+        process.env.INTEGRADOR_SALDO_RESPONSE = JSON.stringify(updates.INTEGRADOR_SALDO_RESPONSE);
+      }
+    } catch (error) {
+      res.status(400).json({ error: "Invalid JSON in INTEGRADOR_SALDO_RESPONSE", details: error.message });
+      return;
+    }
   }
 
   res.status(200).json({ message: "Config updated", config });
