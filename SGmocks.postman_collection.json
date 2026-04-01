@@ -311,6 +311,25 @@
             "description": "Update configuration variables at runtime. Supported fields: GAP, ID_TRX, TRANSFERENCIA_COINAG_IS_ERROR, RANDOM_STR_LENGTH, RANDOM_STR_ERROR_LENGTH, all STATUS_*_STATUS_CODE variables, and response payloads (BANCO_CONSULTA_RESPONSE, INTEGRADOR_SALDO_RESPONSE) as JSON strings."
           },
           "response": []
+        },
+        {
+          "name": "Get Current ID TRX",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/idtrx",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "idtrx"
+              ]
+            },
+            "description": "Get the current ID TRX value"
+          },
+          "response": []
         }
       ]
     }

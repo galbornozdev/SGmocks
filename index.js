@@ -304,6 +304,12 @@ app.post('/admin/config', jsonParser, (req, res) => {
   res.status(200).json({ message: "Config updated", config });
 })
 
+/* ADMIN - GET CURRENT ID TRX */
+
+app.get('/admin/idtrx', (req, res) => {
+  res.status(200).json({ currentIdTrx: config.idTrx });
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
