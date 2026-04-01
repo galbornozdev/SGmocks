@@ -76,7 +76,7 @@ var createNewTrxError = () => {
 }
 
 app.get('/health', (req, res) => {
-  res.status(200).send()
+  res.status(200).send('healthy')
 })
 
 app.post('banco/Transferencia', jsonParser ,(req, res) => {
