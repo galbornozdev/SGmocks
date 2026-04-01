@@ -166,7 +166,7 @@ app.post('/banco/TransferenciaCoinag', jsonParser ,(req, res) => {
 })
 
 app.get('/banco/Consulta/:cbu', jsonParser ,(req, res) => {
-  console.log(`integrador/Saldo/${req.params.cbu}`)
+  console.log(`/banco/Consulta/${req.params.cbu}`)
   console.log("REQUEST:\n", req.body);
   console.log("AUTHORIZATION:\n", req.headers.authorization);
 
