@@ -19,6 +19,7 @@ if (print){
   for (let i = 0; i < print; i++) {
     console.log(randomStr(10))
   }
+  
 }
 
 
